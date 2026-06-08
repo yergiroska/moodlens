@@ -47,3 +47,7 @@ AGENTS.md
 
 # WebStorm
 .idea/
+
+# Environment variables
+.env
+.env.local
