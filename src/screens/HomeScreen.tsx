@@ -2,12 +2,14 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { analyzeMood } from '../services/groq';
+import { saveEntry } from '../services/firestore';
 import { GroqAnalysis } from '../types/mood';
 
 export default function HomeScreen() {
     const [text, setText] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<GroqAnalysis | null>(null);
+    const [saved, setSaved] = useState(false);
     const { user, signOut } = useAuth();
 
     const handleAnalyze = async () => {
@@ -18,8 +20,19 @@ export default function HomeScreen() {
         try {
             setLoading(true);
             setResult(null);
+            setSaved(false);
             const analysis = await analyzeMood(text);
             setResult(analysis);
+
+            if (user) {
+                await saveEntry({
+                    uid: user.uid,
+                    text,
+                    analysis,
+                    createdAt: new Date(),
+                });
+                setSaved(true);
+            }
         } catch (error) {
             Alert.alert('Error', 'No se pudo analizar el texto. Intenta de nuevo.');
         } finally {
@@ -49,6 +62,10 @@ export default function HomeScreen() {
                     <Text style={styles.buttonText}>Analizar 🔍</Text>
                 )}
             </TouchableOpacity>
+
+            {saved && (
+                <Text style={styles.savedText}>✓ Entrada guardada</Text>
+            )}
 
             {result && (
                 <View style={styles.resultContainer}>
@@ -123,11 +140,17 @@ const styles = StyleSheet.create({
         padding: 14,
         borderRadius: 8,
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 16,
     },
     buttonText: {
         color: 'white',
         fontSize: 16,
+        fontWeight: 'bold',
+    },
+    savedText: {
+        color: '#4CAF50',
+        fontSize: 14,
+        marginBottom: 16,
         fontWeight: 'bold',
     },
     resultContainer: {
