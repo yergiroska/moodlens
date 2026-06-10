@@ -1,8 +1,23 @@
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getEntries } from '../services/firestore';
 import { MoodEntry } from '../types/mood';
+import { getIntensityChartData, getEmotionFrequency } from '../utils/chartHelpers';
+import { LineChart, BarChart } from 'react-native-chart-kit';
+
+const screenWidth = Dimensions.get('window').width - 32;
+
+const chartConfig = {
+    backgroundColor: '#6C63FF',
+    backgroundGradientFrom: '#6C63FF',
+    backgroundGradientTo: '#9D97FF',
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    style: { borderRadius: 16 },
+    propsForDots: { r: '6', strokeWidth: '2', stroke: '#fff' },
+};
 
 export default function HistoryScreen() {
     const [entries, setEntries] = useState<MoodEntry[]>([]);
@@ -43,37 +58,75 @@ export default function HistoryScreen() {
         );
     }
 
+    const intensityData = getIntensityChartData(entries);
+    const emotionData = getEmotionFrequency(entries);
+
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
             <Text style={styles.title}>Mi historial 📖</Text>
-            <FlatList
-                data={entries}
-                keyExtractor={(item) => item.id || item.createdAt.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <Text style={styles.emotion}>{item.analysis.emotion}</Text>
-                            <Text style={styles.intensity}>{item.analysis.intensity}/10</Text>
-                        </View>
-                        <Text style={styles.date}>
-                            {item.createdAt.toLocaleDateString('es-ES', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                            })}
-                        </Text>
-                        <Text style={styles.text} numberOfLines={2}>{item.text}</Text>
-                        <Text style={styles.summary}>{item.analysis.summary}</Text>
+
+            {intensityData.length > 1 && (
+                <View style={styles.chartContainer}>
+                    <Text style={styles.chartTitle}>Intensidad emocional</Text>
+                    <LineChart
+                        data={{
+                            labels: intensityData.map((d) => d.date),
+                            datasets: [{ data: intensityData.map((d) => d.intensity) }],
+                        }}
+                        width={screenWidth}
+                        height={180}
+                        chartConfig={chartConfig}
+                        bezier
+                        style={styles.chart}
+                    />
+                </View>
+            )}
+
+            {emotionData.length > 0 && (
+                <View style={styles.chartContainer}>
+                    <Text style={styles.chartTitle}>Emociones de la semana</Text>
+                    <BarChart
+                        data={{
+                            labels: emotionData.map((d) => d.emotion.substring(0, 5)),
+                            datasets: [{ data: emotionData.map((d) => d.count) }],
+                        }}
+                        width={screenWidth}
+                        height={180}
+                        chartConfig={chartConfig}
+                        style={styles.chart}
+                        yAxisLabel=""
+                        yAxisSuffix=""
+                    />
+                </View>
+            )}
+
+            <Text style={styles.sectionTitle}>Entradas recientes</Text>
+            {entries.map((item) => (
+                <View key={item.id || item.createdAt.toString()} style={styles.card}>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.emotion}>{item.analysis.emotion}</Text>
+                        <Text style={styles.intensity}>{item.analysis.intensity}/10</Text>
                     </View>
-                )}
-            />
-        </View>
+                    <Text style={styles.date}>
+                        {item.createdAt.toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                        })}
+                    </Text>
+                    <Text style={styles.text} numberOfLines={2}>{item.text}</Text>
+                    <Text style={styles.summary}>{item.analysis.summary}</Text>
+                </View>
+            ))}
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    content: {
         padding: 16,
         paddingTop: 60,
     },
@@ -86,6 +139,24 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 16,
+    },
+    chartContainer: {
+        marginBottom: 24,
+    },
+    chartTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#444',
+        marginBottom: 8,
+    },
+    chart: {
+        borderRadius: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 12,
+        color: '#444',
     },
     emptyText: {
         fontSize: 18,
