@@ -21,10 +21,16 @@
         "backgroundColor": "#6C63FF"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.yergiroska.moodlens"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1bc77555-6b87-4177-a664-d29cced5db5f"
+      }
     }
   }
 }
