@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { analyzeMood } from '../services/groq';
 import { saveEntry } from '../services/firestore';
 import { GroqAnalysis } from '../types/mood';
+import { colors } from '../constants/colors';
+import { typography } from '../constants/typography';
 
 export default function HomeScreen() {
     const [text, setText] = useState('');
@@ -42,7 +44,13 @@ export default function HomeScreen() {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>MoodLens 🎭</Text>
+            <View style={styles.header}>
+                <Text style={styles.title}>MoodLens 🎭</Text>
+                <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
+                    <Text style={styles.logoutText}>Salir</Text>
+                </TouchableOpacity>
+            </View>
+
             <Text style={styles.subtitle}>¿Cómo te sientes hoy?</Text>
 
             <TextInput
@@ -99,10 +107,6 @@ export default function HomeScreen() {
                     )}
                 </View>
             )}
-
-            <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
-                <Text style={styles.logoutText}>Cerrar sesión</Text>
-            </TouchableOpacity>
         </ScrollView>
     );
 }
@@ -111,81 +115,101 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         alignItems: 'center',
-        padding: 20,
+        padding: 24,
         paddingTop: 60,
+        backgroundColor: colors.background,
     },
     title: {
-        fontSize: 32,
-        fontWeight: 'bold',
+        ...typography.title,
+        color: colors.text,
         marginBottom: 8,
     },
     subtitle: {
-        fontSize: 18,
-        color: '#666',
+        ...typography.subtitle,
+        color: colors.textSecondary,
         marginBottom: 24,
     },
     input: {
         width: '100%',
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
+        borderColor: colors.border,
+        borderRadius: 12,
+        padding: 14,
         fontSize: 16,
         marginBottom: 16,
         minHeight: 120,
+        backgroundColor: '#fafafa',
     },
     button: {
         width: '100%',
-        backgroundColor: '#6C63FF',
-        padding: 14,
-        borderRadius: 8,
+        backgroundColor: colors.primary,
+        padding: 16,
+        borderRadius: 12,
         alignItems: 'center',
         marginBottom: 16,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
+        ...typography.body,
         fontWeight: 'bold',
     },
     savedText: {
-        color: '#4CAF50',
-        fontSize: 14,
+        color: colors.success,
+        ...typography.small,
         marginBottom: 16,
         fontWeight: 'bold',
     },
     resultContainer: {
         width: '100%',
-        backgroundColor: '#f8f4ff',
-        borderRadius: 12,
-        padding: 16,
+        backgroundColor: colors.cardBg,
+        borderRadius: 16,
+        padding: 20,
         marginBottom: 24,
         borderWidth: 1,
-        borderColor: '#e0d7ff',
+        borderColor: colors.primaryBorder,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     resultTitle: {
-        fontSize: 18,
+        ...typography.subtitle,
         fontWeight: 'bold',
-        color: '#6C63FF',
+        color: colors.primary,
         marginBottom: 12,
     },
     resultRow: {
         marginBottom: 10,
     },
     resultLabel: {
-        fontSize: 14,
+        ...typography.small,
         fontWeight: 'bold',
-        color: '#444',
+        color: colors.text,
     },
     resultValue: {
-        fontSize: 14,
-        color: '#666',
+        ...typography.small,
+        color: colors.textSecondary,
         marginTop: 2,
     },
     logoutButton: {
         marginTop: 8,
+        padding: 8,
     },
     logoutText: {
-        color: '#FF6B6B',
-        fontSize: 14,
+        color: colors.danger,
+        ...typography.small,
+    },
+    header: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
     },
 });

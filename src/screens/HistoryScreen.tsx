@@ -5,6 +5,8 @@ import { getEntries } from '../services/firestore';
 import { MoodEntry } from '../types/mood';
 import { getIntensityChartData, getEmotionFrequency } from '../utils/chartHelpers';
 import { LineChart, BarChart } from 'react-native-chart-kit';
+import { colors } from '../constants/colors';
+import { typography } from '../constants/typography';
 
 const screenWidth = Dimensions.get('window').width - 32;
 
@@ -125,56 +127,63 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     content: {
-        padding: 16,
+        padding: 24,
         paddingTop: 60,
     },
     centered: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: colors.background,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 16,
+        ...typography.heading,
+        color: colors.text,
+        marginBottom: 20,
     },
     chartContainer: {
         marginBottom: 24,
     },
     chartTitle: {
-        fontSize: 16,
+        ...typography.body,
         fontWeight: 'bold',
-        color: '#444',
+        color: colors.text,
         marginBottom: 8,
     },
     chart: {
         borderRadius: 16,
     },
     sectionTitle: {
-        fontSize: 18,
+        ...typography.subtitle,
         fontWeight: 'bold',
         marginBottom: 12,
-        color: '#444',
+        color: colors.text,
     },
     emptyText: {
-        fontSize: 18,
+        ...typography.subtitle,
         fontWeight: 'bold',
-        color: '#444',
+        color: colors.text,
     },
     emptySubtext: {
-        fontSize: 14,
-        color: '#888',
+        ...typography.small,
+        color: colors.textMuted,
         marginTop: 8,
     },
     card: {
-        backgroundColor: '#f8f4ff',
-        borderRadius: 12,
+        backgroundColor: colors.cardBg,
+        borderRadius: 16,
         padding: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: '#e0d7ff',
+        borderColor: colors.primaryBorder,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -183,29 +192,29 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     emotion: {
-        fontSize: 16,
+        ...typography.body,
         fontWeight: 'bold',
-        color: '#6C63FF',
+        color: colors.primary,
         textTransform: 'capitalize',
     },
     intensity: {
-        fontSize: 14,
+        ...typography.small,
         fontWeight: 'bold',
-        color: '#6C63FF',
+        color: colors.primary,
     },
     date: {
-        fontSize: 12,
-        color: '#888',
+        ...typography.tiny,
+        color: colors.textMuted,
         marginBottom: 8,
     },
     text: {
-        fontSize: 14,
-        color: '#444',
+        ...typography.small,
+        color: colors.text,
         marginBottom: 4,
         fontStyle: 'italic',
     },
     summary: {
-        fontSize: 14,
-        color: '#666',
+        ...typography.small,
+        color: colors.textSecondary,
     },
 });

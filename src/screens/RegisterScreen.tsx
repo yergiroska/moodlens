@@ -2,6 +2,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { colors } from '../constants/colors';
+import { typography } from '../constants/typography';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -82,42 +84,49 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 20,
+        padding: 24,
+        backgroundColor: colors.background,
     },
     title: {
-        fontSize: 32,
-        fontWeight: 'bold',
+        ...typography.title,
+        color: colors.text,
         marginBottom: 8,
     },
     subtitle: {
-        fontSize: 18,
-        color: '#666',
-        marginBottom: 30,
+        ...typography.subtitle,
+        color: colors.textSecondary,
+        marginBottom: 32,
     },
     input: {
         width: '100%',
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 12,
+        borderColor: colors.border,
+        borderRadius: 12,
+        padding: 14,
         fontSize: 16,
+        marginBottom: 12,
+        backgroundColor: '#fafafa',
     },
     button: {
         width: '100%',
-        backgroundColor: '#6C63FF',
-        padding: 14,
-        borderRadius: 8,
+        backgroundColor: colors.primary,
+        padding: 16,
+        borderRadius: 12,
         alignItems: 'center',
         marginBottom: 16,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
+        ...typography.body,
         fontWeight: 'bold',
     },
     link: {
-        color: '#6C63FF',
-        fontSize: 14,
+        color: colors.primary,
+        ...typography.small,
     },
 });
