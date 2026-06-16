@@ -15,6 +15,7 @@ const chartConfig = {
     backgroundGradientFrom: '#6C63FF',
     backgroundGradientTo: '#9D97FF',
     decimalPlaces: 0,
+    count: 3,
     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     style: { borderRadius: 16 },
@@ -89,11 +90,11 @@ export default function HistoryScreen() {
                     <Text style={styles.chartTitle}>Emociones de la semana</Text>
                     <BarChart
                         data={{
-                            labels: emotionData.map((d) => d.emotion.substring(0, 5)),
+                            labels: emotionData.map((d) => d.emotion),
                             datasets: [{ data: emotionData.map((d) => d.count) }],
                         }}
                         width={screenWidth}
-                        height={180}
+                        height={270}
                         chartConfig={chartConfig}
                         style={styles.chart}
                         yAxisLabel=""

@@ -25,8 +25,14 @@ export function getIntensityChartData(entries: MoodEntry[]): ChartDataPoint[] {
 export function getEmotionFrequency(entries: MoodEntry[]): EmotionCount[] {
     const counts: Record<string, number> = {};
     entries.slice(0, 7).forEach((entry) => {
-        const emotion = entry.analysis.emotion;
+        const emotion = entry.analysis.emotion.toLowerCase().trim();
         counts[emotion] = (counts[emotion] || 0) + 1;
     });
-    return Object.entries(counts).map(([emotion, count]) => ({ emotion, count }));
+    return Object.entries(counts)
+        .map(([emotion, count]) => ({
+            emotion: emotion.charAt(0).toUpperCase() + emotion.slice(1),
+            count,
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4);
 }

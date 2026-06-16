@@ -47,7 +47,7 @@ export default function HomeScreen() {
             <View style={styles.header}>
                 <Text style={styles.title}>MoodLens 🎭</Text>
                 <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
-                    <Text style={styles.logoutText}>Salir</Text>
+                    <Text style={styles.logoutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
             </View>
 
@@ -116,8 +116,9 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: 'center',
         padding: 24,
-        paddingTop: 60,
+        paddingTop: 0,
         backgroundColor: colors.background,
+        justifyContent: 'center',
     },
     title: {
         ...typography.title,
@@ -203,6 +204,7 @@ const styles = StyleSheet.create({
     },
     logoutText: {
         color: colors.danger,
+        fontWeight: 'bold',
         ...typography.small,
     },
     header: {
