@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 12,
         backgroundColor: '#fafafa',
+        color: '#000000',
     },
     button: {
         width: '100%',
