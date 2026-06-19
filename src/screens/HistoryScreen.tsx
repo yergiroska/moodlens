@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Dimensions, TouchableOpacity, Modal } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getEntries } from '../services/firestore';
@@ -22,9 +22,28 @@ const chartConfig = {
     propsForDots: { r: '6', strokeWidth: '2', stroke: '#fff' },
 };
 
+function getEmojiForEmotion(emotion: string): string | null {
+    const normalized = emotion.toLowerCase().trim();
+
+    const happyWords = ['felicidad', 'alegría', 'alegria', 'contento', 'satisfacción', 'satisfaccion'];
+    const sadWords = ['tristeza', 'melancolía', 'melancolia'];
+    const angryWords = ['enojo', 'ira', 'rabia', 'furia'];
+    const stressedWords = ['estrés', 'estres', 'ansiedad', 'miedo', 'agobio', 'nerviosismo'];
+    const neutralWords = ['neutral', 'neutralidad', 'indiferencia', 'apatía', 'apatia'];
+
+    if (happyWords.some((w) => normalized.includes(w))) return '😊';
+    if (sadWords.some((w) => normalized.includes(w))) return '😢';
+    if (angryWords.some((w) => normalized.includes(w))) return '😡';
+    if (stressedWords.some((w) => normalized.includes(w))) return '😰';
+    if (neutralWords.some((w) => normalized.includes(w))) return '😐';
+
+    return '❓';
+}
+
 export default function HistoryScreen() {
     const [entries, setEntries] = useState<MoodEntry[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -105,7 +124,12 @@ export default function HistoryScreen() {
 
             <Text style={styles.sectionTitle}>Entradas recientes</Text>
             {entries.map((item) => (
-                <View key={item.id || item.createdAt.toString()} style={styles.card}>
+                <TouchableOpacity
+                    key={item.id || item.createdAt.toString()}
+                    style={styles.card}
+                    onPress={() => setSelectedEntry(item)}
+                    activeOpacity={0.7}
+                >
                     <View style={styles.cardHeader}>
                         <Text style={styles.emotion}>{item.analysis.emotion}</Text>
                         <Text style={styles.intensity}>{item.analysis.intensity}/10</Text>
@@ -119,8 +143,74 @@ export default function HistoryScreen() {
                     </Text>
                     <Text style={styles.text} numberOfLines={2}>{item.text}</Text>
                     <Text style={styles.summary}>{item.analysis.summary}</Text>
-                </View>
+                </TouchableOpacity>
             ))}
+
+            <Modal
+                visible={selectedEntry !== null}
+                animationType="slide"
+                transparent
+                onRequestClose={() => setSelectedEntry(null)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setSelectedEntry(null)}
+                        >
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+
+                        {selectedEntry && (
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <View style={styles.modalEmotionRow}>
+                                    {getEmojiForEmotion(selectedEntry.analysis.emotion) && (
+                                        <Text style={styles.modalEmoji}>
+                                            {getEmojiForEmotion(selectedEntry.analysis.emotion)}
+                                        </Text>
+                                    )}
+                                    <Text style={styles.modalEmotion}>{selectedEntry.analysis.emotion}</Text>
+                                </View>
+                                <Text style={styles.modalDate}>
+                                    {selectedEntry.createdAt.toLocaleDateString('es-ES', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric',
+                                    })}
+                                </Text>
+
+                                <Text style={styles.modalText}>{selectedEntry.text}</Text>
+
+                                <View style={styles.modalRow}>
+                                    <Text style={styles.modalLabel}>Intensidad:</Text>
+                                    <Text style={styles.modalValue}>{selectedEntry.analysis.intensity}/10</Text>
+                                </View>
+
+                                <View style={styles.modalRow}>
+                                    <Text style={styles.modalLabel}>Resumen:</Text>
+                                    <Text style={styles.modalValue}>{selectedEntry.analysis.summary}</Text>
+                                </View>
+
+                                {selectedEntry.analysis.suggestion && (
+                                    <View style={styles.modalRow}>
+                                        <Text style={styles.modalLabel}>Sugerencia:</Text>
+                                        <Text style={styles.modalValue}>{selectedEntry.analysis.suggestion}</Text>
+                                    </View>
+                                )}
+
+                                {selectedEntry.analysis.secondary_emotions && selectedEntry.analysis.secondary_emotions.length > 0 && (
+                                    <View style={styles.modalRow}>
+                                        <Text style={styles.modalLabel}>Emociones secundarias:</Text>
+                                        <Text style={styles.modalValue}>
+                                            {selectedEntry.analysis.secondary_emotions.join(', ')}
+                                        </Text>
+                                    </View>
+                                )}
+                            </ScrollView>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
@@ -215,6 +305,75 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     summary: {
+        ...typography.small,
+        color: colors.textSecondary,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    modalContent: {
+        backgroundColor: colors.background,
+        borderRadius: 24,
+        padding: 24,
+        paddingTop: 16,
+        maxHeight: '80%',
+        width: '100%',
+    },
+    modalText: {
+        ...typography.body,
+        color: colors.text,
+        fontStyle: 'italic',
+        fontWeight: '600',
+        marginBottom: 20,
+    },
+    closeButton: {
+        alignSelf: 'flex-end',
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: colors.cardBg,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+    },
+    closeButtonText: {
+        fontSize: 18,
+        color: colors.text,
+        fontWeight: 'bold',
+    },
+    modalEmotionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    modalEmoji: {
+        fontSize: 28,
+        marginRight: 8,
+    },
+    modalEmotion: {
+        ...typography.heading,
+        color: colors.primary,
+        textTransform: 'capitalize',
+    },
+    modalDate: {
+        ...typography.small,
+        color: colors.textMuted,
+        marginBottom: 20,
+    },
+    modalRow: {
+        marginBottom: 16,
+    },
+    modalLabel: {
+        ...typography.small,
+        fontWeight: 'bold',
+        color: colors.text,
+        marginBottom: 4,
+    },
+    modalValue: {
         ...typography.small,
         color: colors.textSecondary,
     },

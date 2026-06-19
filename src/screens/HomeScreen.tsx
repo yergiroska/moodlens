@@ -7,29 +7,46 @@ import { GroqAnalysis } from '../types/mood';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
 
+const MOOD_OPTIONS = [
+    { emoji: '😊', label: 'Felicidad', color: '#FFD700', hint: 'Me siento feliz' },
+    { emoji: '😢', label: 'Tristeza', color: '#4A90D9', hint: 'Me siento triste' },
+    { emoji: '😡', label: 'Enojo', color: '#E74C3C', hint: 'Me siento enojado' },
+    { emoji: '😰', label: 'Estrés', color: '#F39C12', hint: 'Me siento estresado' },
+    { emoji: '😐', label: 'Neutral', color: '#9E9E9E', hint: 'Me siento neutral' },
+];
+
 export default function HomeScreen() {
     const [text, setText] = useState('');
+    const [selectedMood, setSelectedMood] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<GroqAnalysis | null>(null);
     const [saved, setSaved] = useState(false);
     const { user, signOut } = useAuth();
 
+    const handleSelectMood = (index: number) => {
+        setSelectedMood(selectedMood === index ? null : index);
+    };
+
     const handleAnalyze = async () => {
-        if (!text.trim()) {
-            Alert.alert('Error', 'Escribe cómo te sientes primero');
+        if (!text.trim() && selectedMood === null) {
+            Alert.alert('Error', 'Selecciona una carita o escribe cómo te sientes');
             return;
         }
         try {
             setLoading(true);
             setResult(null);
             setSaved(false);
-            const analysis = await analyzeMood(text);
+
+            const moodHint = selectedMood !== null ? MOOD_OPTIONS[selectedMood].hint : '';
+            const combinedText = [moodHint, text.trim()].filter(Boolean).join('. ');
+
+            const analysis = await analyzeMood(combinedText);
             setResult(analysis);
 
             if (user) {
                 await saveEntry({
                     uid: user.uid,
-                    text,
+                    text: combinedText,
                     analysis,
                     createdAt: new Date(),
                 });
@@ -53,9 +70,29 @@ export default function HomeScreen() {
 
             <Text style={styles.subtitle}>¿Cómo te sientes hoy?</Text>
 
+            <View style={styles.moodRow}>
+                {MOOD_OPTIONS.map((mood, index) => (
+                    <TouchableOpacity
+                        key={mood.label}
+                        style={[
+                            styles.moodCircle,
+                            { backgroundColor: mood.color },
+                            selectedMood === index && styles.moodCircleSelected,
+                        ]}
+                        onPress={() => handleSelectMood(index)}
+                    >
+                        <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            {selectedMood !== null && (
+                <Text style={styles.moodLabel}>{MOOD_OPTIONS[selectedMood].label}</Text>
+            )}
+
             <TextInput
                 style={styles.input}
-                placeholder="Escribe cómo te sientes..."
+                placeholder="Escribe cómo te sientes... (opcional)"
                 value={text}
                 onChangeText={setText}
                 multiline
@@ -128,7 +165,37 @@ const styles = StyleSheet.create({
     subtitle: {
         ...typography.subtitle,
         color: colors.textSecondary,
-        marginBottom: 24,
+        marginBottom: 16,
+    },
+    moodRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 8,
+    },
+    moodCircle: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: 0.6,
+    },
+    moodCircleSelected: {
+        opacity: 1,
+        borderWidth: 3,
+        borderColor: colors.text,
+    },
+    moodEmoji: {
+        fontSize: 26,
+    },
+    moodLabel: {
+        ...typography.small,
+        color: colors.textSecondary,
+        textAlign: 'center',
+        width: '100%',
+        marginBottom: 16,
+        fontWeight: 'bold',
     },
     input: {
         width: '100%',
