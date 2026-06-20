@@ -8,6 +8,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
+import StatsScreen from './src/screens/StatsScreen';
 import { colors } from './src/constants/colors';
 
 const Stack = createNativeStackNavigator();
@@ -21,6 +22,8 @@ function MainTabs() {
                     let iconName: keyof typeof Ionicons.glyphMap;
                     if (route.name === 'Home') {
                         iconName = focused ? 'happy' : 'happy-outline';
+                    } else if (route.name === 'History') {
+                        iconName = focused ? 'book' : 'book-outline';
                     } else {
                         iconName = focused ? 'bar-chart' : 'bar-chart-outline';
                     }
@@ -40,6 +43,7 @@ function MainTabs() {
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Hoy' }} />
             <Tab.Screen name="History" component={HistoryScreen} options={{ title: 'Historial' }} />
+            <Tab.Screen name="Stats" component={StatsScreen} options={{ title: 'Estadisticas' }} />
         </Tab.Navigator>
     );
 }

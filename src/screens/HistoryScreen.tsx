@@ -1,26 +1,10 @@
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Dimensions, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getEntries } from '../services/firestore';
 import { MoodEntry } from '../types/mood';
-import { getIntensityChartData, getEmotionFrequency } from '../utils/chartHelpers';
-import { LineChart, BarChart } from 'react-native-chart-kit';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
-
-const screenWidth = Dimensions.get('window').width - 32;
-
-const chartConfig = {
-    backgroundColor: '#6C63FF',
-    backgroundGradientFrom: '#6C63FF',
-    backgroundGradientTo: '#9D97FF',
-    decimalPlaces: 0,
-    count: 3,
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    style: { borderRadius: 16 },
-    propsForDots: { r: '6', strokeWidth: '2', stroke: '#fff' },
-};
 
 function getEmojiForEmotion(emotion: string): string | null {
     const normalized = emotion.toLowerCase().trim();
@@ -80,47 +64,9 @@ export default function HistoryScreen() {
         );
     }
 
-    const intensityData = getIntensityChartData(entries);
-    const emotionData = getEmotionFrequency(entries);
-
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
             <Text style={styles.title}>Mi historial 📖</Text>
-
-            {intensityData.length > 1 && (
-                <View style={styles.chartContainer}>
-                    <Text style={styles.chartTitle}>Intensidad emocional</Text>
-                    <LineChart
-                        data={{
-                            labels: intensityData.map((d) => d.date),
-                            datasets: [{ data: intensityData.map((d) => d.intensity) }],
-                        }}
-                        width={screenWidth}
-                        height={180}
-                        chartConfig={chartConfig}
-                        bezier
-                        style={styles.chart}
-                    />
-                </View>
-            )}
-
-            {emotionData.length > 0 && (
-                <View style={styles.chartContainer}>
-                    <Text style={styles.chartTitle}>Emociones de la semana</Text>
-                    <BarChart
-                        data={{
-                            labels: emotionData.map((d) => d.emotion),
-                            datasets: [{ data: emotionData.map((d) => d.count) }],
-                        }}
-                        width={screenWidth}
-                        height={270}
-                        chartConfig={chartConfig}
-                        style={styles.chart}
-                        yAxisLabel=""
-                        yAxisSuffix=""
-                    />
-                </View>
-            )}
 
             <Text style={styles.sectionTitle}>Entradas recientes</Text>
             {entries.map((item) => (
@@ -234,18 +180,6 @@ const styles = StyleSheet.create({
         ...typography.heading,
         color: colors.text,
         marginBottom: 20,
-    },
-    chartContainer: {
-        marginBottom: 24,
-    },
-    chartTitle: {
-        ...typography.body,
-        fontWeight: 'bold',
-        color: colors.text,
-        marginBottom: 8,
-    },
-    chart: {
-        borderRadius: 16,
     },
     sectionTitle: {
         ...typography.subtitle,
