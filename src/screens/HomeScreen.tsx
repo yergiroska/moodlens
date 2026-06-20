@@ -93,6 +93,7 @@ export default function HomeScreen() {
             <TextInput
                 style={styles.input}
                 placeholder="Escribe cómo te sientes... (opcional)"
+                placeholderTextColor="#999999"
                 value={text}
                 onChangeText={setText}
                 multiline
